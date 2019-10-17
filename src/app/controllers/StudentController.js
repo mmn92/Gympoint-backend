@@ -1,3 +1,4 @@
+import * as Yup from 'yup';
 import Student from '../models/Student';
 
 class StudentController {
@@ -36,6 +37,20 @@ class StudentController {
   }
 
   async store(req, res) {
+    const schema = Yup.object().shape({
+      name: Yup.string().required(),
+      email: Yup.string()
+        .email()
+        .required(),
+      age: Yup.string().required(),
+      weight: Yup.string().required(),
+      height: Yup.string().required(),
+    });
+
+    if (!(await schema.isValid(req.body))) {
+      return res.status(400).json({ error: 'Validation fail' });
+    }
+
     const findStudent = await Student.findOne({
       where: { email: req.body.email },
     });
@@ -59,6 +74,18 @@ class StudentController {
   }
 
   async update(req, res) {
+    const schema = Yup.object().shape({
+      name: Yup.string(),
+      email: Yup.string().email(),
+      age: Yup.string(),
+      weight: Yup.string(),
+      height: Yup.string(),
+    });
+
+    if (!(await schema.isValid(req.body))) {
+      return res.status(400).json({ error: 'Validation fail' });
+    }
+
     const reqEmail = req.body.email;
 
     const student = await Student.findByPk(req.params.id);
