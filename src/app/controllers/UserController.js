@@ -3,15 +3,11 @@ import User from '../models/User';
 
 class UserController {
   async index(req, res) {
-    const users = await User.findAll();
+    const users = await User.findAll({
+      attributes: ['id', 'name', 'email'],
+    });
 
-    return res.json(
-      users.map(user => ({
-        id: user.id,
-        name: user.name,
-        email: user.email,
-      }))
-    );
+    return res.json(users);
   }
 
   async store(req, res) {

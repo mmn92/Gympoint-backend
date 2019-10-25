@@ -3,18 +3,11 @@ import Student from '../models/Student';
 
 class StudentController {
   async index(req, res) {
-    const students = await Student.findAll();
+    const students = await Student.findAll({
+      attributes: ['id', 'name', 'email', 'age', 'weight', 'height'],
+    });
 
-    return res.json(
-      students.map(student => ({
-        id: student.id,
-        name: student.name,
-        email: student.email,
-        age: student.age,
-        weight: student.weight,
-        height: student.height,
-      }))
-    );
+    return res.json(students);
   }
 
   async show(req, res) {
