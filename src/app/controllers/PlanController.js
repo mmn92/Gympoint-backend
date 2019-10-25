@@ -26,6 +26,30 @@ class PlanController {
 
     return res.json(plan);
   }
+
+  async update(req, res) {
+    const { title } = req.body;
+
+    const plan = await Plan.findByPk(req.params.id);
+
+    if (!plan) {
+      return res.status(401).json({ error: 'There is no plan with this id' });
+    }
+
+    if (title && title !== plan.title) {
+      const findPlan = await Plan.findOne({ where: { title } });
+
+      if (findPlan) {
+        return res
+          .status(401)
+          .json({ error: 'There already is a plan with this title' });
+      }
+    }
+
+    const newPlan = await plan.update(req.body);
+
+    return res.json(newPlan);
+  }
 }
 
 export default new PlanController();
