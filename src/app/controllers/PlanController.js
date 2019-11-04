@@ -50,6 +50,29 @@ class PlanController {
 
     return res.json(newPlan);
   }
+
+  async delete(req, res) {
+    const plan = await Plan.findByPk(req.params.id);
+
+    if (!plan) {
+      return res.status(401).json({ error: 'There is no plan with this id' });
+    }
+
+    const isDeleted = await Plan.destroy({ where: { id: req.params.id } });
+
+    if (!isDeleted) {
+      return res.status(500).json({ error: 'Could not delete entry' });
+    }
+
+    const { id, title, duration, price } = plan;
+
+    return res.json({
+      id,
+      title,
+      duration,
+      price,
+    });
+  }
 }
 
 export default new PlanController();
