@@ -8,7 +8,15 @@ class RegistrationController {
   async store(req, res) {
     const { student_id, plan_id, date } = req.body;
 
-    const findStudent = await Student.findByPk(student_id);
+    const findStudent = await Student.findByPk(student_id, {
+      include: [
+        {
+          model: Registration,
+          as: 'registration',
+          attributes: ['end_date', 'active'],
+        },
+      ],
+    });
 
     if (!findStudent) {
       return res.status(401).json({ error: 'Invalid student' });
@@ -18,6 +26,12 @@ class RegistrationController {
 
     if (!findPlan) {
       return res.status(401).json({ error: 'Invalid plan' });
+    }
+
+    if (findStudent.registration && findStudent.registration.active) {
+      return res
+        .status(401)
+        .json({ error: 'Student already has an active registration' });
     }
 
     const price = findPlan.duration * findPlan.price;
