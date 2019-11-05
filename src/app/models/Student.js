@@ -15,6 +15,13 @@ class Student extends Model {
       }
     );
   }
+
+  static associate(models) {
+    this.belongsTo(models.Registration, {
+      foreignKey: 'registration_id',
+      as: 'registration',
+    });
+  }
 }
 
 export default Student;
