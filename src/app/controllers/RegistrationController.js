@@ -1,0 +1,59 @@
+import { endOfDay, parseISO, isBefore, isSameDay, addMonths } from 'date-fns';
+
+import Student from '../models/Student';
+import Plan from '../models/Plan';
+import Registration from '../models/Registration';
+
+class RegistrationController {
+  async store(req, res) {
+    const { student_id, plan_id, date } = req.body;
+
+    const findStudent = await Student.findByPk(student_id);
+
+    if (!findStudent) {
+      return res.status(401).json({ error: 'Invalid student' });
+    }
+
+    const findPlan = await Plan.findByPk(plan_id);
+
+    if (!findPlan) {
+      return res.status(401).json({ error: 'Invalid plan' });
+    }
+
+    const price = findPlan.duration * findPlan.price;
+
+    const parsed = endOfDay(parseISO(date));
+    const before =
+      isBefore(parsed, endOfDay(new Date())) ||
+      isSameDay(parsed, endOfDay(new Date()));
+
+    if (before) {
+      return res
+        .status(400)
+        .json({ error: 'Your starting date must be a day in the future' });
+    }
+
+    const { id, start_date, end_date } = await Registration.create({
+      student_id,
+      plan_id,
+      start_date: parsed,
+      end_date: addMonths(parsed, findPlan.duration),
+      price,
+    });
+
+    await findStudent.update({
+      registration_id: id,
+    });
+
+    return res.json({
+      id,
+      student_id,
+      plan_id,
+      start_date,
+      end_date,
+      price,
+    });
+  }
+}
+
+export default new RegistrationController();
