@@ -4,6 +4,7 @@ import UserController from './app/controllers/UserController';
 import SessionController from './app/controllers/SessionController';
 import StudentController from './app/controllers/StudentController';
 import PlanController from './app/controllers/PlanController';
+import RegistrationController from './app/controllers/RegistrationController';
 
 import authMiddleware from './app/middlewares/auth';
 
@@ -21,6 +22,7 @@ routes.get('/plans', PlanController.index);
 routes.post('/users', UserController.store);
 routes.post('/students', StudentController.store);
 routes.post('/plans', PlanController.store);
+routes.post('/registrations', RegistrationController.store);
 
 routes.put('/students/:id', StudentController.update);
 routes.put('/plans/:id', PlanController.update);
