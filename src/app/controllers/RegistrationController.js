@@ -5,6 +5,30 @@ import Plan from '../models/Plan';
 import Registration from '../models/Registration';
 
 class RegistrationController {
+  async index(req, res) {
+    const registrations = await Registration.findAll({
+      attributes: ['id', 'start_date', 'end_date', 'price', 'active'],
+      include: [
+        {
+          model: Student,
+          as: 'student',
+          attributes: ['id', 'name', 'email'],
+        },
+        {
+          model: Plan,
+          as: 'plan',
+          attributes: ['id', 'title'],
+        },
+      ],
+    });
+
+    const activeRegistrations = registrations.filter(
+      registration => registration.active
+    );
+
+    return res.json(activeRegistrations);
+  }
+
   async store(req, res) {
     const { student_id, plan_id, date } = req.body;
 
