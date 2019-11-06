@@ -24,10 +24,12 @@ class Registration extends Model {
 
     this.addHook('beforeSave', async registration => {
       registration.price = registration.price_month * registration.duration;
-      registration.end_date = addMonths(
-        registration.start_date,
-        registration.duration
-      );
+      if (registration.start_date) {
+        registration.end_date = addMonths(
+          registration.start_date,
+          registration.duration
+        );
+      }
     });
 
     return this;

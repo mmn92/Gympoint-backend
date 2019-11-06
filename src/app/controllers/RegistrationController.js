@@ -90,6 +90,32 @@ class RegistrationController {
       price,
     });
   }
+
+  async update(req, res) {
+    const findRegistration = await Registration.findByPk(req.params.id);
+
+    if (!findRegistration) {
+      return res.status(401).json({ error: 'Registration not found' });
+    }
+
+    if (!findRegistration.active) {
+      return res
+        .status(401)
+        .json({ error: 'You cant update an inactive registration' });
+    }
+
+    const { plan_id } = req.body;
+
+    const findPlan = await Plan.findByPk(plan_id);
+
+    const updated = await findRegistration.update({
+      start_date: new Date(),
+      duration: findPlan.duration,
+      price_month: findPlan.price,
+    });
+
+    return res.json(updated);
+  }
 }
 
 export default new RegistrationController();
