@@ -7,7 +7,14 @@ import Registration from '../models/Registration';
 class RegistrationController {
   async index(req, res) {
     const registrations = await Registration.findAll({
-      attributes: ['id', 'start_date', 'end_date', 'price', 'active'],
+      attributes: [
+        'id',
+        'start_date',
+        'end_date',
+        'price',
+        'active',
+        'canceled_at',
+      ],
       include: [
         {
           model: Student,
@@ -23,7 +30,7 @@ class RegistrationController {
     });
 
     const activeRegistrations = registrations.filter(
-      registration => registration.active
+      registration => registration.active && !registration.canceled_at
     );
 
     return res.json(activeRegistrations);
@@ -37,7 +44,7 @@ class RegistrationController {
         {
           model: Registration,
           as: 'registration',
-          attributes: ['end_date', 'active'],
+          attributes: ['end_date', 'active', 'canceled_at'],
         },
       ],
     });
@@ -109,12 +116,47 @@ class RegistrationController {
     const findPlan = await Plan.findByPk(plan_id);
 
     const updated = await findRegistration.update({
+      plan_id,
+      update_date: true,
       start_date: new Date(),
       duration: findPlan.duration,
       price_month: findPlan.price,
     });
 
     return res.json(updated);
+  }
+
+  async delete(req, res) {
+    const registration = await Registration.findByPk(req.params.id, {
+      include: [
+        {
+          model: Student,
+          as: 'student',
+          attributes: ['id', 'name', 'email'],
+        },
+        {
+          model: Plan,
+          as: 'plan',
+          attributes: ['id', 'title'],
+        },
+      ],
+    });
+
+    if (!registration) {
+      return res.status(401).json({ error: 'Registration not found' });
+    }
+
+    if (!registration.cancelable) {
+      return res
+        .status(401)
+        .json({ error: 'Registration is already cancelled' });
+    }
+
+    await registration.update({
+      canceled_at: new Date(),
+    });
+
+    return res.json(registration);
   }
 }
 
