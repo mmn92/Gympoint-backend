@@ -1,15 +1,15 @@
 import Sequelize, { Model } from 'sequelize';
-import { isBefore } from 'date-fns';
+import { isBefore, addMonths } from 'date-fns';
 
 class Registration extends Model {
   static init(sequelize) {
     super.init(
       {
-        // student_id: Sequelize.INTEGER,
-        // plan_id: Sequelize.INTEGER,
         start_date: Sequelize.DATE,
+        duration: Sequelize.VIRTUAL,
         end_date: Sequelize.DATE,
         price: Sequelize.INTEGER,
+        price_month: Sequelize.VIRTUAL,
         active: {
           type: Sequelize.VIRTUAL,
           get() {
@@ -21,6 +21,16 @@ class Registration extends Model {
         sequelize,
       }
     );
+
+    this.addHook('beforeSave', async registration => {
+      registration.price = registration.price_month * registration.duration;
+      registration.end_date = addMonths(
+        registration.start_date,
+        registration.duration
+      );
+    });
+
+    return this;
   }
 
   static associate(models) {
