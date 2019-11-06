@@ -14,6 +14,15 @@ class Student extends Model {
         sequelize,
       }
     );
+
+    return this;
+  }
+
+  static associate(models) {
+    this.belongsTo(models.Registration, {
+      foreignKey: 'registration_id',
+      as: 'registration',
+    });
   }
 }
 
