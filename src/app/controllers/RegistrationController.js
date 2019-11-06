@@ -1,4 +1,4 @@
-import { endOfDay, parseISO, isBefore, isSameDay, addMonths } from 'date-fns';
+import { endOfDay, parseISO, isBefore, isSameDay } from 'date-fns';
 
 import Student from '../models/Student';
 import Plan from '../models/Plan';
@@ -58,8 +58,6 @@ class RegistrationController {
         .json({ error: 'Student already has an active registration' });
     }
 
-    const price = findPlan.duration * findPlan.price;
-
     const parsed = endOfDay(parseISO(date));
     const before =
       isBefore(parsed, endOfDay(new Date())) ||
@@ -71,12 +69,12 @@ class RegistrationController {
         .json({ error: 'Your starting date must be a day in the future' });
     }
 
-    const { id, start_date, end_date } = await Registration.create({
+    const { id, start_date, end_date, price } = await Registration.create({
       student_id,
       plan_id,
       start_date: parsed,
-      end_date: addMonths(parsed, findPlan.duration),
-      price,
+      duration: findPlan.duration,
+      price_month: findPlan.price,
     });
 
     await findStudent.update({
