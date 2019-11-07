@@ -1,8 +1,11 @@
-import { endOfDay, parseISO, isBefore, isSameDay } from 'date-fns';
+import { endOfDay, parseISO, isBefore, isSameDay, format } from 'date-fns';
+import pt from 'date-fns/locale/pt';
 
 import Student from '../models/Student';
 import Plan from '../models/Plan';
 import Registration from '../models/Registration';
+
+import Mail from '../../lib/Mail';
 
 class RegistrationController {
   async index(req, res) {
@@ -86,6 +89,20 @@ class RegistrationController {
 
     await findStudent.update({
       registration_id: id,
+    });
+
+    await Mail.sendMail({
+      to: `${findStudent.name} <${findStudent.email}>`,
+      subject: 'Nova matrícula',
+      template: 'registration',
+      context: {
+        student: findStudent.name,
+        plan: findPlan.title,
+        price: findPlan.price * findPlan.duration,
+        date: format(end_date, "'dia' dd 'de' MMMM', às' H:mm'h'", {
+          locale: pt,
+        }),
+      },
     });
 
     return res.json({
